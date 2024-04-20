@@ -1,5 +1,22 @@
 import sys
+import string
+import random
 
+
+# Set to store existing booking references to make sure it is unique
+existing_references = set()
+
+# Define a function which can produce a random reference
+def produce_reference():
+    
+    while True:
+        # Generate a random string of 8 alphanumeric characters
+        reference = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        # Check if it is unique by looking up in the existing references set
+        if reference not in existing_references:
+            existing_references.add(reference)
+            return reference
+        
 class ApachAirlineBookingSystem:
     def __init__(self):
         # Initial configuration of the airplane seating
@@ -30,8 +47,18 @@ class ApachAirlineBookingSystem:
         """Allows the user to book a seat."""
         seat = input("Enter the seat to book: ")
         if self.seats.get(seat) == 'F':
-            self.seats[seat] = 'R'
-            print("Seat booked successfully.")
+            first_name = input("Enter first name: ")
+            last_name = input("Enter last name: ")
+            passport_number= input("Enter passport number: ")
+            reference = produce_reference()
+            # Store a dictionary of booking info in the seat
+            self.seats[seat] = {
+                "reference": reference,
+                "passport_number": passport_number,
+                "first_name": first_name,
+                "last_name": last_name
+            }
+            print(f"Seat booked successfully! Reference: {reference}")
         else:
             print("This seat is not available for booking.")
 
@@ -48,7 +75,12 @@ class ApachAirlineBookingSystem:
         """Shows the current state of all seats."""
         print("Current booking state:")
         for seat, status in self.seats.items():
-            print(f"{seat}: {'Reserved' if status == 'R' else 'Free' if status == 'F' else 'Non-bookable'}")
+            if status == 'F':
+                print(f"{seat}: Free")
+            elif status in ['S', 'X']:
+                print(f"{seat}: Non-bookable")
+            else:
+                print(f"{seat}: Reserved - {status['reference']} ({status['first_name']} {status['last_name']})")
 
     def exit_program(self):
         """Exits the program."""
